@@ -2,7 +2,6 @@
 #include <string>
 int main()
 {
-	//Сортировка вставками
 	int j, key = 0, i;
 	int mass[6] = { 5, 2, 4, 6, 1, 3 };
 	for (j = 1; j != 6; j++) {

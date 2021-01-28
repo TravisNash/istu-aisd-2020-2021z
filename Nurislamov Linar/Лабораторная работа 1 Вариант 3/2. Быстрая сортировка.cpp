@@ -1,5 +1,4 @@
 #include <iostream>
-//функция Быстрой сортировки
 void speedsort(int* mas, int first, int last)
 {
 	int mid, count;
