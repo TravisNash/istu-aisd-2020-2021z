@@ -1,4 +1,3 @@
-//Ефимов Сергей
 #include<iostream>
 #include <conio.h>
 
@@ -16,15 +15,15 @@ void print(int a[])
 
 int Partition(int a[], int left, int right)
 {
-    int temp = left, support = a[left], element; //support - опорная точка, тут я беру самую левую часть массива
-    //процесс выполнения подробно описан ниже
+    int temp = left, pivot = a[left], element; //support - опорная точка, тут я беру самую левую часть массива
+
     for (element = left + 1; element <= right; element++)
     {
-        if (support > a[element])
+        if (pivot > a[element])
         {
             a[temp] = a[element];
             a[element] = a[temp + 1];
-            a[temp + 1] = support;
+            a[temp + 1] = pivot;
 
             temp = temp + 1;
         }
