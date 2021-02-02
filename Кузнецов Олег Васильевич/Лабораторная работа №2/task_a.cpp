@@ -27,7 +27,6 @@ private:
 		ListNode* next;
 	};
 	ListNode* first;
-	ListNode* last;
 	int count;
 };
 
@@ -53,14 +52,29 @@ int main(int argc, char** argv)
 	list->delete_by_value(1);
 	list->delete_by_value(3);
 	list->delete_by_value(8);
+	list->delete_by_value(1);
+	list->delete_by_value(3);
+
 	list->print_all_items();
 
+	list->insert_by_index(0, 12);
+	list->print_all_items();
 	list->insert_by_index(1, 0);
+	list->print_all_items();
 	list->insert_by_index(3, 2);
+	list->print_all_items();
 	list->insert_by_index(5, 4);
+	list->print_all_items();
 	list->insert_by_index(7, 6);
-	list->insert_to_end(9);
-	
+	list->print_all_items();
+	list->insert_to_end(99);
+	list->print_all_items();
+	list->insert_by_index(0, 17);
+	list->print_all_items();
+
+
+	std::cout << "Count = " << list->get_length() << std::endl;
+
 	int len = list->get_length();
 	for (int i = 0; i < len; ++i) {
 		std::cout << (*list)[i] << " ";
@@ -73,34 +87,41 @@ int main(int argc, char** argv)
 
 CircularList::CircularList()
 {
-	first = last = nullptr;
+	first = nullptr;
 	count = 0;
 }
 
 //Освобождение памяти от структуры данных
 CircularList::~CircularList()
 {
-	last->next = nullptr;
-	while (first) {
-		last = first;
-		first = first->next;
-		delete last;
+	if (!first) {
+		return;
 	}
-	last = nullptr;
+	ListNode *deleted_node = first->next;
+	while (first != deleted_node) {
+		ListNode *buf = deleted_node;
+		deleted_node = deleted_node->next;
+		delete buf;
+	}
+	delete first;
 }
 
 //Вставка элемента в конец
 void CircularList::insert_to_end(const int value)
 {
-	ListNode* buf = new ListNode;
-	buf->value = value;
+	ListNode* insert_node = new ListNode;
+	insert_node->value = value;
+	
 	if (first) {
-		buf->next = first;
-		last->next = buf;
-		last = buf;
+		ListNode **buf = &first->next;
+		while (*buf != first) {
+			buf = &(*buf)->next;
+		}
+		*buf = insert_node;
+		insert_node->next = first;
 	} else {
-		last = first = buf;
-		buf->next = first;
+		first = insert_node;
+		first->next = first;
 	}
 	count++;
 }
@@ -109,30 +130,38 @@ void CircularList::insert_to_end(const int value)
 void CircularList::insert_by_index(const int index, 
 	const int value)
 {
-	if (!first or index > count) {
+	if (!first || index > count) {
 		insert_to_end(value);
 		return;
 	}
+	bool is_in_the_first_place = ( index == 0 ) ? true : false;
+	int iter_count = ( index == 0 ) ? count : index;
 	ListNode** buf = &first;
-	for (int i = 1; i < index; ++i) {
+	for (int i = 0; i < iter_count; ++i) {
 		buf = &((*buf)->next);
 	}
 	ListNode* new_item = new ListNode;
 	new_item->value = value;
 	new_item->next = *buf;
 	*buf = new_item;
+	if (is_in_the_first_place) {
+		first = new_item;
+	}
 	count++;
 }
 
 //Получение значения элемента по индексу
 const int CircularList::get_by_index(const int index) 
 {
-	if (index >= count) {
-		return last->value;
+	if (!first) {
+		return -1;
 	}
 	ListNode* buf = first;
 	for (int i = 0; i < index; ++i) {
 		buf = buf->next;
+		if (buf == first) {
+			break;
+		}
 	}
 	return buf->value;
 }
@@ -149,25 +178,28 @@ bool CircularList::delete_by_value(const int value)
 	if (!first) {
 		return false;
 	}
-	if (first->value == value) {
-		ListNode* delete_item = first;
-		first = first->next;
-		last->next = first;
-		delete delete_item;
-		count--;
-		return true;
-	}
 	ListNode** buf = &first->next;
-	while (*buf != first) {
+	if (first->value == value) {
+		for ( ; *buf != first; buf = &(*buf)->next) {}
+		*buf = first->next;
+		delete first;
+		count --;
+		if (count == 0) {
+			first = nullptr;
+		} else {
+			first = *buf;
+		}
+		return true;
+	} 
+	for ( ; *buf != first; buf = &(*buf)->next) {
 		if ((*buf)->value == value) {
-			ListNode* delete_item = *buf;
+			ListNode* deleted_item = *buf;
 			*buf = (*buf)->next;
-			delete delete_item;
+			delete deleted_item;
 			count--;
 			return true;
-		}
-		buf = &(*buf)->next;
-	} 
+		}	
+	}
 	return false;
 }
 
@@ -175,14 +207,16 @@ bool CircularList::delete_by_value(const int value)
 void CircularList::print_all_items()
 {
 	if(!first) {
+		std::cout << "{}";
 		return;
 	}
+	std::cout << "{ ";
 	std::cout << first->value << " ";
 	ListNode* buf = first->next;
 	for ( ; buf != first; buf = buf->next) {
 		std::cout << buf->value << " ";
 	}
-	std::cout << std::endl;
+	std::cout << "}" << std::endl;
 }
 
 int CircularList::get_length() 
